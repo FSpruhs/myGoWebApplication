@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/fspruhs/myGoWebApplication/pkg/render"
 	"net/http"
+
+	"github.com/fspruhs/myGoWebApplication/pkg/render"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
