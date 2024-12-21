@@ -2,24 +2,47 @@ package render
 
 import (
 	"bytes"
+	//"bytes"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/fspruhs/myGoWebApplication/pkg/config"
+	"github.com/fspruhs/myGoWebApplication/pkg/models"
 )
 
-func Template(w http.ResponseWriter, tmpl string) {
+var app *config.AppConfig
+
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
+
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
+func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+	var tc map[string]*template.Template
+
+	if app.UseCache {
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
+	}
 
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Fatalln("could not get template from template cache", err)
+		log.Fatalln("could not get template from template cache", ok)
 	}
 
 	buffer := new(bytes.Buffer)
 
-	err = t.Execute(buffer, nil)
+	td = AddDefaultData(td)
+
+	err := t.Execute(buffer, td)
 	if err != nil {
-		log.Println("error writing template to browser", err)
+		log.Println("error writing template to buffer", err)
 	}
 
 	_, err = buffer.WriteTo(w)
