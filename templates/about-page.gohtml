@@ -6,6 +6,13 @@
             <div class="col">
                 <h1>This is the about page</h1>
                 Lore ipsum dolor sit amet, consectetur adipisicing elit. Quos, voluptates.
+                <p>
+                    {{if ne (index .StringMap "remote_ip") ""}}
+                        Your IP is {{index .StringMap "remote_ip"}}
+                        {{else}}
+                        Your IP is unknown
+                    {{end}}
+                </p>
             </div>
         </div>
     </div>
