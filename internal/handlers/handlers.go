@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/fspruhs/myGoWebApplication/internal/config"
+	"github.com/fspruhs/myGoWebApplication/internal/forms"
 	"github.com/fspruhs/myGoWebApplication/internal/models"
 	"github.com/fspruhs/myGoWebApplication/internal/render"
 )
@@ -86,5 +87,43 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) MakeReservation(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "make-reservation-page.gohtml", &models.TemplateData{})
+	var emptyReservation models.Reservation
+
+	data := make(map[string]interface{})
+	data["reservation"] = emptyReservation
+
+	render.Template(w, r, "make-reservation-page.gohtml", &models.TemplateData{
+		Data: data,
+		Form: forms.New(nil),
+	})
+}
+
+func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	reservation := models.Reservation{
+		Name:  r.Form.Get("full_name"),
+		Email: r.Form.Get("email"),
+		Phone: r.Form.Get("phone"),
+	}
+
+	form := forms.New(r.PostForm)
+
+	form.Required("full_name", "email")
+	form.MinLength("full_name", 2)
+	form.IsEmail("email")
+
+	if !form.Valid() {
+		data := make(map[string]interface{})
+		data["reservation"] = reservation
+		render.Template(w, r, "make-reservation-page.gohtml", &models.TemplateData{
+			Form: form,
+			Data: data,
+		})
+		return
+	}
 }
